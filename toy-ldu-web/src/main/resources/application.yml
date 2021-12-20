@@ -1,0 +1,7 @@
+spring:
+   datasource:
+        jdbc-url: jdbc:log4jdbc:oracle:thin:@localhost:1521/orcl
+        username: C##PALETTE
+        password: Palette12#$
+        #driver-class-name: "oracle.jdbc.driver.OracleDriver"
+        driver-class-name: "net.sf.log4jdbc.sql.jdbcapi.DriverSpy"
