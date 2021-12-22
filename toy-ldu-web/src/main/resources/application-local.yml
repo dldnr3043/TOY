@@ -1,0 +1,56 @@
+spring.jpa:
+  database: oracle
+  # Whether to enable logging of SQL statements.
+  showSql: true
+  # Whether to initialize the schema on startup.
+  generate-ddl: false
+  # Register OpenEntityManagerInViewInterceptor. Binds a JPA EntityManager to the thread for the entire processing of the request.
+  open-in-view: false
+  hibernate:
+    # DDL mode. This is actually a shortcut for the "hibernate.hbm2ddl.auto" property. Defaults to "create-drop" when using an embedded database and no schema manager was detected. Otherwise, defaults to "none".
+    ddl-auto: none
+    naming:
+      # Fully qualified name of the physical naming strategy.
+      physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  # Additional native properties to set on the JPA provider.
+  properties:
+    hibernate:
+      dialect: org.hibernate.dialect.Oracle12cDialect
+      use_sql_comments: true
+      format_sql: true
+      show_sql: false
+      #default_schema: palette
+      enable_lazy_load_no_trans: true
+
+spring:
+   datasource:
+        url: jdbc:log4jdbc:oracle:thin:@localhost:1521/orcl
+        username: C##PALETTE
+        password: Palette12#$
+        #driver-class-name: "oracle.jdbc.driver.OracleDriver"
+        driver-class-name: "net.sf.log4jdbc.sql.jdbcapi.DriverSpy"
+        
+        
+# ----------------------------------------
+# CommonProperties
+# ----------------------------------------
+common:
+  enabled: true
+  # 서비스 URL
+  service-url: http://localhost:8080
+  # 공개 URL (외부에서 접근이 필요한 경우 사용)
+  public-url: http://localhost:8080
+  # vue URL (SPA를 사용해 프론트 단 view의 vue Resource 출처)
+  vue-url: http://localhost:3000
+  
+# ----------------------------------------
+# SecurityProperties
+# ----------------------------------------
+security:
+   # 인증 성공 시 대상 URL
+    auth-success-target-url: ${common.service-url}/web/main
+    # 로그아웃 성공 시 대상 URL
+    logout-success-target-url: ${common.service-url}/web/login
+  
+  
+  
