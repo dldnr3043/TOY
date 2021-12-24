@@ -13,8 +13,7 @@ module.exports = {
     outputDir : path.resolve(__dirname, "./build/public/"), 
     devServer: { 
         port: 3000,
-        proxy: 'http://localhost:8080',
-        productionSourceMap: false,
+        proxy: 'http://localhost:8080'
     },
    
 }

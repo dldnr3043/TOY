@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.myproject.toy.signup.dao.SignupMapper">
+
+	<!-- 가입된 이메일인지 조회 -->
+	<select id="searchSameMail" parameterType= "java.util.HashMap" resultType="java.util.HashMap">
+		SELECT EMAIL 
+		FROM TOY_CMN_USER
+		WHERE EMAIL = #{EMAIL}
+	</select>
+
+	<!-- 유저 신규 등록 -->
+	<insert id="insertUser" parameterType= "java.util.HashMap">
+	
+	INSERT INTO TOY_CMN_USER 
+	       ( EMAIL		/* EMAIL */
+	       , NAME		/* 이름 */
+	       , PASSWORD   /* 비밀번호 */
+	) VALUES 
+	       ( #{EMAIL}
+	       , #{NAME}
+	       , #{PASSWORD} 
+	)
+	
+	</insert>
+	
+	<!-- 유저 신규 권한 등록 -->
+	<insert id="insertUserRole" parameterType= "java.util.HashMap">
+	
+	INSERT INTO TOY_CMN_USER_ROLES
+	       ( TOY_CMN_USER_EMAIL		/* EMAIL */
+	       , ROLES					/* 유저 권한 */
+	) VALUES 
+	       ( #{EMAIL}
+	       , #{ROLES}
+	)
+	
+	</insert>
+
+</mapper>

@@ -2,10 +2,12 @@ package com.myproject.toy.common.security.config;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -25,8 +27,8 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.myproject.toy.common.config.properties.common.CommonProperty;
-import com.myproject.toy.login.util.JwtAuthenticationFilter;
-import com.myproject.toy.login.util.JwtTokenProvider;
+import com.myproject.toy.login.utils.JwtAuthenticationFilter;
+import com.myproject.toy.login.utils.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,22 +50,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 	
-	private final CommonProperty   commonProperty;
-	private final JwtTokenProvider jwtTokenProvider;
-//	private final SecurityProperty securityProperty;
-	// 암호화에 필요한 PasswordEncoder 를 Bean 등록합니다.
+    private final JwtTokenProvider jwtTokenProvider;
+
+    // 암호화에 필요한 PasswordEncoder 를 Bean 등록합니다.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-    
+
     // authenticationManager를 Bean 등록합니다.
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-	
+	    
     /**
      * HttpSecurity객체는 현재 로그인한 사용자가 적절한 역할과 연결돼 있는지 확인하는 서블릿 필터를 생성한다.
      * ant 패턴식 설명
@@ -78,9 +79,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
     protected void configure(HttpSecurity http) throws Exception
     {
         http
-            .cors()	// 필수
+            .cors()	// VUE와 API 단의 Resource 출처가 달라 cors 적용 필요하므로 설정
             .and()
-            .csrf().disable()
+            .csrf().disable()	// csrf 공격 방어를 위해 설정 (csrf : 사용자의 의도가 없이 공격자가 의도한 행위의 request를 하도록 하는 공격) TODO 사용하는 것으로 설정 필요
+            
+            // 토큰 기반 인증이므로 세션 사용 해제 설정
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            
+            .and()
             .authorizeRequests()
             // vue.js 클라이언트 + spring boot rest api(db포함) 서버 개발 시 API와 Web Application이 서로 다른 출처
             // api : ex) localhost:8080		Web Application : ex) localhost:3000
@@ -89,11 +95,27 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
             // preflight는 현재 Web Application과 호출한 api의 Resource 출처가 동일한지 먼저 http Options 메소드로 통신을 시도해보는 것
             // 따라서 preflight는 인증하지 않아도 됨
             // 출처 : https://sas-study.tistory.com/298
-            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
-        
-        
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
-        http.csrf().disable();
+            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+            
+            //로그인 / 로그아웃 / 회원가입은 별도 인증 필요없이 허용
+            .antMatchers("/login").permitAll()
+            .antMatchers("/logout").permitAll()
+            .antMatchers("/signup").permitAll()
+            
+            // 그 외 나머지 url은 인증 필요
+            .anyRequest().authenticated()
+            
+            // 인증, 인가 예외발생시 처리 TODO
+            .and()
+            .exceptionHandling()
+//            .authenticationEntryPoint(authenticationEntryPoint)	// 인증 예외시	ex) redirect login page
+//            .accessDeniedHandler(accessDeniedHandler)				// 인가 예외시	ex) redirect denied page
+            
+            // 실제 아이디 비밀번호 인증 하는 UsernamePasswordAuthenticationFilter 전에 Jwt 토큰 값 인증필터 수행
+            .and()
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                    UsernamePasswordAuthenticationFilter.class);
+            ;
     }
     
     /**
@@ -106,12 +128,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
            .ignoring()
         //- antMatchers는 순서가 굉장히 중요하다.
            .antMatchers("/")
-//           .antMatchers("/infra/hkcdv/api/chatbotContactHistory")
-//           .antMatchers("/message"
-//                      , "/reference"
-//                      , "/expired_session"
-//                      , "/message_bot")
-//           .antMatchers("/message/**/")
            .antMatchers("/**/css/**")
            .antMatchers("/**/img/**")
            .antMatchers("/**/js/**")
@@ -119,7 +135,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
            .antMatchers("/webjars/**")
            .antMatchers("/error*/**")
            .antMatchers("/favicon*/**")
-//           .antMatchers("/RepositoryPublic/**")
          ;
     }
     
@@ -139,14 +154,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
         return strictHttpFirewall;
     }
     
+    /**
+     * cors config 설정 함수
+     * Bean으로 등록하여 사용
+     * @return
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
       System.out.println("----------------cors config-----------------------");
 
       CorsConfiguration configuration = new CorsConfiguration();
 
-      // vue 단의 url 허용
-      configuration.addAllowedOrigin(commonProperty.getVueUrl().toString());
+      // vue 단의 url 허용	TODO 프로퍼티로 수정 필요
+      configuration.addAllowedOrigin("http://localhost:3000");
       configuration.addAllowedMethod("*");
       configuration.addAllowedHeader("*");
       configuration.setAllowCredentials(true);
@@ -156,22 +176,5 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
       System.out.println("----------------cors config end-----------------------");
       return source;
-    }
-    
-    /**
-     * SuccessHandler bean register
-     * 
-     * Form Login(AuthenticationFilter)에서 인증이 성공했을 때 수행될 핸들러이다.
-     * SimpleUrlAuthenticationSuccessHandler를 상속한 SavedRequestAwareAuthenticationSuccessHandler를
-     * 다시 상속한 TeletalkAuthenticationSuccessHandler를 등록해주었다.
-     * @return successHandler
-     */
-    @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() throws Exception
-    {
-    	log.info("test :::::::");
-        ToyAuthenticationSuccessHandler successHandler = new ToyAuthenticationSuccessHandler();
-        successHandler.setDefaultTargetUrl("http://localhost:8080/web/main");
-        return successHandler;
     }
 }

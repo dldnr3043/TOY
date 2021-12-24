@@ -3,18 +3,27 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex);
 
-const messages = {
+const store = new Vuex.Store({
 	state: {
-		test: 'test'
-	}
-}
+    },
+    
+    mutations: {
+        /*setToken(state, payload) {
+            state.token = payload;
+        }*/
+    },
 
+    getters: {
 
+    },
 
+    actions: {
 
-
-export default new Vuex.Store({
-    modules: {
-        messages,
     }
 })
+
+
+
+
+
+export default store

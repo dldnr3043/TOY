@@ -1,32 +1,36 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Test from '../components/Test.vue'
+import Login from '../components/Login.vue'
 import HelloWorld from '../components/HelloWorld.vue'
+import Signup from '../components/Signup.vue'
 
 Vue.use(Router)
 
 export default new Router({
-    mode: 'history', // history ���� �ڿ������� url ����, �������� ������ �ؽ�(#)��ȣ�� url ���
+    mode: 'history',
     routes: [
+        // root 경로
 		{
             path: "/",
             name: "HelloWorld",
-            component: HelloWorld
+            component: Login
+        },
+        // 로그인 화면
+        {
+            path: "/login",
+            name: "Login",
+            component: Login
+        },
+        // 회원가입 화면
+        {
+            path: "/signup",
+            name: "Signup",
+            component: Signup
         },
         {
-            path: "/test", // ���
-            name: "test", // �ش� ����� �̸� 
-            component: Test // �̵��� ������Ʈ
-        },
-        {
-            path: "/foo",
-            name: "Foo",
-            component: HelloWorld
-        },
-        {
-            path: "/bar",
-            name: "Bar",
+            path: "/web/main",
+            name: "Main",
             component: HelloWorld
         },
     ]
