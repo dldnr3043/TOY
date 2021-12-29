@@ -36,19 +36,19 @@ public class LoginServiceImpl implements LoginService {
         	retObject.put("STATUS", "FAIL");
             retObject.put("MESSAGE", "가입되지 않은 E-MAIL 입니다.");
         }
-        
-        if (!passwordEncoder.matches(user.get("password"), member.getPassword())) {
+        else if (!passwordEncoder.matches(user.get("password"), member.getPassword())) {
         	retObject.put("STATUS", "FAIL");
             retObject.put("MESSAGE", "잘못된 비밀번호입니다.");
         }
-        
-        String token = jwtTokenProvider.createToken(member.getUsername(), member.getRoles());
-        response.addHeader("X-AUTH-TOKEN", token);
+        else {
+        	String token = jwtTokenProvider.createToken(member.getUsername(), member.getRoles());
+            response.addHeader("X-AUTH-TOKEN", token);
 
-        retObject.put("STATUS", "SUCCESS");
-        retObject.put("EMAIL", member.getEmail());
-        retObject.put("NAME", member.getUsername());
-        retObject.put("ROLES", member.getRoles().toString());
+            retObject.put("STATUS", "SUCCESS");
+            retObject.put("EMAIL", member.getEmail());
+            retObject.put("NAME", member.getUsername());
+            retObject.put("ROLES", member.getRoles().toString());
+        }
 	        
         return retObject;
 	}
