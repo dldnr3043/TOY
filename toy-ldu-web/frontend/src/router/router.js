@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Login from '../components/Login.vue'
-import HelloWorld from '../components/HelloWorld.vue'
-import Signup from '../components/Signup.vue'
+import Login from '../components/login/Login.vue'
+import ChatMain from '../components/chat/ChatMain.vue'
+import Signup from '../components/signup/Signup.vue'
 
 Vue.use(Router)
 
@@ -13,7 +13,7 @@ export default new Router({
         // root 경로
 		{
             path: "/",
-            name: "HelloWorld",
+            name: "Root",
             component: Login
         },
         // 로그인 화면
@@ -29,9 +29,9 @@ export default new Router({
             component: Signup
         },
         {
-            path: "/web/main",
-            name: "Main",
-            component: HelloWorld
+            path: "/web/chat/main",
+            name: "ChatMain",
+            component: ChatMain
         },
     ]
 })

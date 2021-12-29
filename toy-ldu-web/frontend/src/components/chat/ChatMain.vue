@@ -32,27 +32,34 @@
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'ChatMain',
   props: {
     msg: String
-  }
+  },
+
+  methods: {
+    // 로그인 처리 함수
+    processLogin : function() {
+      // 서버에 보낼 인증 데이터(이메일, 비밀번호)
+      let data = {};
+      data.email = this.email;
+      data.password = this.password;
+
+      this.$http.post('/api/test', data)
+      .then(res => {
+        console.log(res);
+      })
+    },
+
+    goSignUpPage : function() {
+      this.$router.push({name: 'Signup'});
+    },
+
+  },
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+<style >
+
 </style>
