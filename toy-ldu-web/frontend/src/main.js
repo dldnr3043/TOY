@@ -9,7 +9,6 @@ require("./assets/css/bootstrap.css");
 
 Vue.prototype.$store = store;	// 전역에서 this.$store 사용 가능
 
-// axios request에 jwt 토큰 값 넣기 : for all requests
 axios.defaults.headers.post['Content-Type'] = 'application.json';
 
 // 캐싱 방지

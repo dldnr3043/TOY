@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.myproject.toy.common.authority.enumer.AutorityEnumer;
-import com.myproject.toy.common.core.sequence.app.SequenceService;
 import com.myproject.toy.signup.dao.SignupMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SignupServiceImpl implements SignupService{
 	
 	private final SignupMapper 	  signupMapper;
-	private final SequenceService sequenceService;
+	private final PasswordEncoder passwordEncoder;
 	
 	@Override
 	public Map<String, String> processSignup(Map<String, String> user) {
@@ -31,6 +31,8 @@ public class SignupServiceImpl implements SignupService{
 			ret.put("MESSAGE", "이미 가입된 이메일입니다.");
 		}
 		else {
+			param.put("PASSWORD", passwordEncoder.encode(user.get("PASSWORD")));
+			
 			// 유저 추가
 			signupMapper.insertUser(param);
 			
@@ -39,6 +41,7 @@ public class SignupServiceImpl implements SignupService{
 			signupMapper.insertUserRole(param);
 			
 			ret.put("STATUS", "SUCCESS");
+			ret.put("MESSAGE", "회원가입에 성공했습니다.");
 		}
 		
 		return ret;

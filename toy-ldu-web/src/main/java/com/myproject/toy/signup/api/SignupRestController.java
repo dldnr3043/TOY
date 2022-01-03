@@ -27,6 +27,7 @@ public class SignupRestController {
     public ResponseEntity<?> SignUp(@RequestBody Map<String, String> user) {
     	Map<String, String> retObject = new HashMap<String, String>();
     	
+    	log.info("test :::::::::");
     	retObject = signupService.processSignup(user);
         
         return ResponseEntity.ok(retObject);
